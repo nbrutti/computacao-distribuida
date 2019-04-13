@@ -1,4 +1,4 @@
-# Decrição
+# Descrição
 
 Trata-se de uma aplicação de comunicação através de sockets UDP/IPv4. Cada nó (cliente) é capaz de enviar e receber pacotes. Cada pacote é composto por: host destino, porta destino e a mesagem.
 
