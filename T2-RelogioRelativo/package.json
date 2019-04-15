@@ -1,0 +1,13 @@
+{
+  "name": "T2-RelogioRelativo",
+  "version": "1.0.0",
+  "description": "Demonstração de relógio relativo. Utilizando relógios vetoriais",
+  "main": "client.js",
+  "repository": "https://github.com/nbrutti/computacao-distribuida.git",
+  "author": "Nicholas Brutti",
+  "license": "MIT",
+  "dependencies": {
+    "cron": "^1.7.0",
+    "shortid": "^2.2.14"
+  }
+}
