@@ -76,4 +76,4 @@ server.on('message', (message, remote) => {
   }
 });
 
-server.bind(params.port, '127.0.0.1');
+server.bind(params.port, params.host);
