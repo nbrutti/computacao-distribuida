@@ -1,0 +1,10 @@
+source;destination;message
+A;B;attack
+A;C;retire
+A;D;attack
+B;C;attack
+B;D;attack
+C;B;retire
+C;D;retire
+D;B;attack
+D;C;attack

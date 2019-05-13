@@ -1,0 +1,17 @@
+{
+  "name": "T3-Acordo",
+  "version": "1.0.0",
+  "description": "Aplicação que dado um problema distribuído de acordo bizantino, consegue identificar o nó \"traidor\", através do consenso de todos os integrantes da rede\"",
+  "main": "soldier.js",
+  "repository": "https://github.com/nbrutti/computacao-distribuida.git",
+  "author": "Nicholas Brutti",
+  "license": "MIT",
+  "dependencies": {
+    "cron": "^1.7.1",
+    "csv-parser": "^2.2.0",
+    "fs": "^0.0.1-security",
+    "minimist": "^1.2.0",
+    "shortid": "^2.2.14",
+    "udp": "^1.0.0"
+  }
+}
