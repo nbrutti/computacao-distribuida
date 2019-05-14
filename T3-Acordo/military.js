@@ -7,12 +7,14 @@ const reader = new InputReader();
 const packet = require('./packet.js');
 
 reader.parseCsv('militaries.csv').then(m => {
-  reader.parseCsv('links.csv').then(l => {
+  reader.parseCsv('topologies/second.csv').then(l => {
     return main(m, l);
   });
 });
 
-let traidores = [];
+let impostores = [];
+
+let neighboors = [];
 let received_pkgs = [];
 let send_pkgs = [];
 
@@ -29,23 +31,55 @@ const queueFindById = ((q, id) => {
 });
 
 const searchFault = new CronJob('*/10 * * * * *', () => {
+  console.log("--------------------------------------");
+  console.log('Recebidos: ');
+  console.log(received_pkgs);
+  console.log('Enviados: ');
+  console.log(send_pkgs);
+  console.log('Vizinhos: ');
+  console.log(neighboors);
+  console.log('Impostores: ');
+  console.log(impostores);
+  console.log("--------------------------------------");
   received_pkgs.forEach(rec => {
     send_pkgs.forEach(sen => {
-      if (rec.source_id === sen.destination_id) {
-        console.log(`${rec.source_id} ${rec.message} -- ${rec.destination_id} ${sen.message}`);
+      if (rec.source_id === sen.destination_id && rec.message !== sen.message) {
+        neighboors.forEach(neighboor => {
+          if (rec.source_id === neighboor.index) {
+            if (neighboor.message === rec.message) {
+              let info = searchMessageRec(neighboor.source_id);
+              if (info !== neighboor.message) {
+                impostores.push(neighboor.source_id);
+              } else {
+                impostores.push(params.id);
+              }
+            } else {
+              impostores.push(neighboor.index);
+            }
+          }
+        });
       }
     })
   });
 }, null, true, 'America/Sao_Paulo');
 
+function searchMessageRec(id) {
+  for (let i = 0; i < received_pkgs.length; i++) {
+    if (received_pkgs[i].source_id === id) {
+      return received_pkgs[i].message;
+    }
+  }
+  return null;
+}
+
 const job = new CronJob('*/5 * * * * *', () => {
   queue.forEach(pkg => {
-    let buffer = JSON.stringify(pkg);
     pkg.received_pkgs = received_pkgs;
+    let buffer = JSON.stringify(pkg);
     server.send(buffer, 0, buffer.length, pkg.port, pkg.hostname);
+    return;
   });
 }, null, true, 'America/Sao_Paulo');
-
 
 server.on('listening', () => {
   let address = server.address();
@@ -59,8 +93,18 @@ server.on('message', (message, remote) => {
       source_id: pkg.source_id,
       message: pkg.message
     });
+    pkg.received_pkgs = received_pkgs;
     console.log(`\nMessage received from ${remote.address}:${remote.port}`);
-    console.log(`Packet info: ${message}`);
+    console.log(`Packet info: ${JSON.stringify(pkg)}`);
+
+    pkg.send_pkgs.forEach(p => {
+      neighboors.push({
+        index: p.destination_id,
+        source_id: pkg.source_id,
+        message: p.message
+      });
+    });
+
     server.send(pkg._id, 0, pkg._id.length, remote.port, remote.address, () => {
       console.log(`ACK has been sent to ${remote.address}:${remote.port}`);
     });
