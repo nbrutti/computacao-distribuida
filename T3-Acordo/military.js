@@ -30,6 +30,22 @@ const queueFindById = ((q, id) => {
   return -1;
 });
 
+function findImpostor(id) {
+  let investigou_alguem = false;
+  let rec = received_pkgs.find(item => (item.source_id === id));
+  console.log(`Procurou mensagem do ID: ${id} e achou: ${(rec || {}).message}`);
+  if (!rec) return;
+  neighboors.forEach(neighboor => {
+    if (id === neighboor.index && neighboor.message === rec.message) {
+        console.log('findImpostor: Mandando investigar ', neighboor.source_id);
+        investigou_alguem = true;
+        findImpostor(neighboor.source_id);
+    }
+  });
+  if (!investigou_alguem) impostores.push(id);
+  return;
+}
+
 const searchFault = new CronJob('*/10 * * * * *', () => {
   console.log("--------------------------------------");
   console.log('Recebidos: ');
@@ -41,25 +57,24 @@ const searchFault = new CronJob('*/10 * * * * *', () => {
   console.log('Impostores: ');
   console.log(impostores);
   console.log("--------------------------------------");
+  let contagens = {attack: 0, retire: 0};
   received_pkgs.forEach(rec => {
-    send_pkgs.forEach(sen => {
-      if (rec.source_id === sen.destination_id && rec.message !== sen.message) {
-        neighboors.forEach(neighboor => {
-          if (rec.source_id === neighboor.index) {
-            if (neighboor.message === rec.message) {
-              let info = searchMessageRec(neighboor.source_id);
-              if (info !== neighboor.message) {
-                impostores.push(neighboor.source_id);
-              } else {
-                impostores.push(params.id);
-              }
-            } else {
-              impostores.push(neighboor.index);
-            }
-          }
-        });
-      }
-    })
+    contagens[rec.message] = contagens[rec.message] + 1;
+  });
+
+  let mensagem_menos_quantidade, numero_menor = 1439473;
+  Object.keys(contagens).forEach(msg => {
+    if (contagens[msg] < numero_menor) {
+      numero_menor = contagens[msg];
+      mensagem_menos_quantidade = msg;
+    }
+  });
+
+  received_pkgs.forEach(rec => {
+    if (rec.message === mensagem_menos_quantidade) {
+      console.log('Mandando investigar ', rec.source_id);
+      findImpostor(rec.source_id);
+    }
   });
 }, null, true, 'America/Sao_Paulo');
 
